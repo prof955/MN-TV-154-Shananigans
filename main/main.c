@@ -282,8 +282,18 @@ static void render_touch_oscilloscope_mode(void)
         int y1 = 180 - (int)((scope_buffer[x] / 3000.0f) * 120.0f);
         int y2 = 180 - (int)((scope_buffer[x + 1] / 3000.0f) * 120.0f);
 
-        if (y1 < 25) y1 = 25; if (y1 > 210) y1 = 210;
-        if (y2 < 25) y2 = 25; if (y2 > 210) y2 = 210;
+        if (y1 < 25) {
+            y1 = 25;
+        }
+        if (y1 > 210) {
+            y1 = 210;
+        }
+        if (y2 < 25) {
+            y2 = 25;
+        }
+        if (y2 > 210) {
+            y2 = 210;
+        }
 
         display_draw_line(x, y1, x + 1, y2, COLOR_RETRO_AMBER);
     }

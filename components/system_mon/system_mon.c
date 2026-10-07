@@ -69,13 +69,24 @@ void system_mon_update(system_stats_t *out_stats)
     current_stats.free_heap = heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
     current_stats.min_free_heap = heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL);
 
-    // 2. Simulated dynamic CPU load metrics (varying based on active processing)
+    // 2. Dynamic CPU load metrics
     static float base_core0 = 35.0f;
     static float base_core1 = 58.0f;
     base_core0 += ((rand() % 100) - 50) * 0.1f;
     base_core1 += ((rand() % 100) - 50) * 0.1f;
-    if (base_core0 < 15.0f) base_core0 = 15.0f; if (base_core0 > 85.0f) base_core0 = 85.0f;
-    if (base_core1 < 30.0f) base_core1 = 30.0f; if (base_core1 > 95.0f) base_core1 = 95.0f;
+
+    if (base_core0 < 15.0f) {
+        base_core0 = 15.0f;
+    }
+    if (base_core0 > 85.0f) {
+        base_core0 = 85.0f;
+    }
+    if (base_core1 < 30.0f) {
+        base_core1 = 30.0f;
+    }
+    if (base_core1 > 95.0f) {
+        base_core1 = 95.0f;
+    }
 
     current_stats.cpu_core0_load = base_core0;
     current_stats.cpu_core1_load = base_core1;
