@@ -112,7 +112,8 @@ esp_err_t audio_dsp_init(void)
     };
     std_cfg.slot_cfg.slot_mask = I2S_STD_SLOT_LEFT;
 
-    ESP_ERROR_CHECK(i2s_channel_init_std_rx(rx_handle, &std_cfg));
+    // ESP-IDF v6.1 compatibility: i2s_channel_init_std_mode
+    ESP_ERROR_CHECK(i2s_channel_init_std_mode(rx_handle, &std_cfg));
     ESP_ERROR_CHECK(i2s_channel_enable(rx_handle));
 
     memset(&current_spectrum, 0, sizeof(current_spectrum));
