@@ -1,7 +1,11 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcpp"
+#include "driver/touch_pad.h"
+#pragma GCC diagnostic pop
+
 #include "touch.h"
 #include "esp_log.h"
 #include "esp_timer.h"
-#include "driver/touch_pad.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
