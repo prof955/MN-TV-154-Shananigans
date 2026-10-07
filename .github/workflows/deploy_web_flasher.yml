@@ -1,0 +1,57 @@
+name: Deploy Web Flasher & Release Artifacts
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build ESP32 Binaries
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ESP-IDF Build
+        uses: espressif/esp-idf-action-docker@v1
+        with:
+          esp_idf_version: v5.1
+          target: esp32
+
+      - name: Package Binaries & Web Flasher Assets
+        run: |
+          mkdir -p release docs
+          cp build/bootloader/bootloader.bin docs/
+          cp build/partition_table/partition-table.bin docs/
+          cp build/esp32_hardware_showcase.bin docs/
+
+          python3 tools/merge_bin.py \
+            docs/bootloader.bin \
+            docs/partition-table.bin \
+            docs/esp32_hardware_showcase.bin \
+            release/esp32_hardware_showcase_merged_0x0.bin
+
+          cp docs/bootloader.bin release/
+          cp docs/partition-table.bin release/
+          cp docs/esp32_hardware_showcase.bin release/
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            release/esp32_hardware_showcase_merged_0x0.bin
+            release/esp32_hardware_showcase.bin
+            release/bootloader.bin
+            release/partition-table.bin

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Hardware Showcase - Web Flasher</title>
+    <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+    <style>
+        :root {
+            --bg-color: #0d0e15;
+            --card-bg: #161824;
+            --accent-amber: #fd2000;
+            --accent-gold: #ffb700;
+            --accent-pink: #ff007f;
+            --accent-cyan: #00f0ff;
+            --text-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 90vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border: 2px solid var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--accent-gold);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 183, 0, 0.5);
+        }
+
+        p {
+            color: #a0aec0;
+            line-height: 1.6;
+        }
+
+        .hardware-list {
+            text-align: left;
+            background: #090a0f;
+            padding: 15px 20px;
+            border-left: 4px solid var(--accent-pink);
+            border-radius: 4px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        .hardware-list ul {
+            margin: 5px 0 0 0;
+            padding-left: 20px;
+        }
+
+        .flasher-box {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px dashed var(--accent-gold);
+            border-radius: 8px;
+            background: #10121d;
+        }
+
+        esp-web-install-button {
+            --esp-tools-button-color: var(--accent-pink);
+            --esp-tools-button-text-color: #ffffff;
+            --esp-tools-button-border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+        }
+
+        .footer {
+            margin-top: 25px;
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🚀 ESP32 Hardware Showcase & 16-Band Spectrum Analyzer</h1>
+    <p>Direct Web Serial Browser Flasher (Chrome / Edge supported)</p>
+
+    <div class="hardware-list">
+        <strong>⚡ Required Hardware Pinout:</strong>
+        <ul>
+            <li><strong>ST7789 LCD (240x240):</strong> MOSI:13, SCLK:14, CS:15, DC:2, PWR:21, BL:19</li>
+            <li><strong>INMP441 Microphone:</strong> BCLK:26, WS:25, SD:22</li>
+            <li><strong>Touch Pad:</strong> T9 (GPIO 32)</li>
+        </ul>
+    </div>
+
+    <div class="flasher-box">
+        <p>Connect your ESP32 via USB and click the button below to flash live in your browser:</p>
+        <esp-web-install-button manifest="manifest.json"></esp-web-install-button>
+    </div>
+
+    <div class="footer">
+        Powered by <a href="https://esphome.github.io/esp-web-tools/" target="_blank">ESP Web Tools</a> & ESP-IDF v5.x
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "ESP32 Hardware Showcase & 16-Band Spectrum Analyzer",
+  "version": "1.0.0",
+  "home_page": "https://github.com/user/esp32_hardware_showcase",
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        { "path": "bootloader.bin", "offset": 4096 },
+        { "path": "partition-table.bin", "offset": 32768 },
+        { "path": "esp32_hardware_showcase.bin", "offset": 65536 }
+      ]
+    }
+  ]
+}
