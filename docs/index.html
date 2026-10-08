@@ -75,6 +75,17 @@
             background: #10121d;
         }
 
+        .unsupported-warning {
+            background: rgba(253, 32, 0, 0.15);
+            border: 1px solid var(--accent-amber);
+            color: #fbd38d;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+            display: none;
+        }
+
         esp-web-install-button {
             --esp-tools-button-color: var(--accent-pink);
             --esp-tools-button-text-color: #ffffff;
@@ -96,6 +107,11 @@
         a:hover {
             text-decoration: underline;
         }
+        a:focus-visible {
+            outline: 2px solid var(--accent-gold);
+            outline-offset: 3px;
+            border-radius: 2px;
+        }
     </style>
 </head>
 <body>
@@ -114,14 +130,22 @@
     </div>
 
     <div class="flasher-box">
+        <div id="unsupported-warning" class="unsupported-warning" role="alert">
+            ⚠️ Your browser does not support Web Serial. Please use desktop Google Chrome, Microsoft Edge, or Brave to flash firmware.
+        </div>
         <p>Connect your ESP32 via USB and click the button below to flash live in your browser:</p>
         <esp-web-install-button manifest="manifest.json"></esp-web-install-button>
     </div>
 
     <div class="footer">
-        Powered by <a href="https://esphome.github.io/esp-web-tools/" target="_blank">ESP Web Tools</a> & ESP-IDF v5.x
+        Powered by <a href="https://esphome.github.io/esp-web-tools/" target="_blank" rel="noopener noreferrer" aria-label="ESP Web Tools (opens in a new tab)">ESP Web Tools</a> & ESP-IDF v5.x
     </div>
 </div>
 
+<script>
+    if (!('serial' in navigator)) {
+        document.getElementById('unsupported-warning').style.display = 'block';
+    }
+</script>
 </body>
 </html>
