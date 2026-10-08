@@ -112,7 +112,7 @@ esp_err_t audio_dsp_init(void)
     };
     std_cfg.slot_cfg.slot_mask = I2S_STD_SLOT_LEFT;
 
-    // ESP-IDF v6.1 compatibility: i2s_channel_init_std_mode
+    // ESP-IDF v6.1 compatibility
     ESP_ERROR_CHECK(i2s_channel_init_std_mode(rx_handle, &std_cfg));
     ESP_ERROR_CHECK(i2s_channel_enable(rx_handle));
 
@@ -134,10 +134,13 @@ void audio_dsp_process(spectrum_data_t *out_spectrum)
         return;
     }
 
-    // 1. Convert 24-bit PCM inside 32-bit container & apply Hann Window
+    // 1. Convert 24-bit PCM inside 32-bit container & apply 6.0x Software Gain Boost
     float sum_sq = 0.0f;
+    #define AUDIO_GAIN_BOOST 6.0f
+
     for (int i = 0; i < FFT_N; i++) {
-        float sample = (float)(raw_i2s_buffer[i] >> 8) / 8388608.0f; // 2^23 scaling
+        float sample = ((float)(raw_i2s_buffer[i] >> 8) / 8388608.0f) * AUDIO_GAIN_BOOST;
+        current_spectrum.raw_audio_wave[i] = sample;
         sum_sq += sample * sample;
         real[i] = sample * hann_window[i];
         imag[i] = 0.0f;
@@ -145,11 +148,11 @@ void audio_dsp_process(spectrum_data_t *out_spectrum)
 
     // RMS Volume Calculation
     float rms = sqrtf(sum_sq / FFT_N);
-    current_spectrum.rms_volume = rms * 100.0f * 4.0f;
+    current_spectrum.rms_volume = rms * 100.0f * 3.5f;
     if (current_spectrum.rms_volume > 100.0f) current_spectrum.rms_volume = 100.0f;
 
     // Transient Clap Detection
-    current_spectrum.clap_detected = (rms > 0.35f);
+    current_spectrum.clap_detected = (rms > 0.45f);
 
     // 2. Perform 512-point Real FFT
     fft_radix2(real, imag);
@@ -165,22 +168,22 @@ void audio_dsp_process(spectrum_data_t *out_spectrum)
             if (mag > max_mag) max_mag = mag;
         }
 
-        // Normalize & scale magnitude smoothly
-        float norm_val = (max_mag / 20.0f);
+        // High sensitivity band normalization (scaling threshold 3.5)
+        float norm_val = (max_mag / 3.5f);
         if (norm_val > 1.0f) norm_val = 1.0f;
 
-        // Exponential smoothing
-        current_spectrum.band_values[b] = current_spectrum.band_values[b] * 0.4f + norm_val * 0.6f;
+        // Dynamic smoothing
+        current_spectrum.band_values[b] = current_spectrum.band_values[b] * 0.3f + norm_val * 0.7f;
 
         // Peak Hold and Exponential Decay logic
         if (current_spectrum.band_values[b] >= current_spectrum.band_peaks[b]) {
             current_spectrum.band_peaks[b] = current_spectrum.band_values[b];
-            current_spectrum.peak_decay_counters[b] = 8; // Hold peak for 8 frames
+            current_spectrum.peak_decay_counters[b] = 6;
         } else {
             if (current_spectrum.peak_decay_counters[b] > 0) {
                 current_spectrum.peak_decay_counters[b]--;
             } else {
-                current_spectrum.band_peaks[b] -= 0.04f; // Exponential decay rate
+                current_spectrum.band_peaks[b] -= 0.05f;
                 if (current_spectrum.band_peaks[b] < 0.0f) {
                     current_spectrum.band_peaks[b] = 0.0f;
                 }

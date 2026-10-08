@@ -24,6 +24,7 @@ typedef struct {
     uint8_t peak_decay_counters[SPECTRUM_BANDS]; // Counters for peak decay delay
     float rms_volume;                    // Total audio RMS volume percentage (0-100%)
     bool clap_detected;                  // Transient clap detection flag
+    float raw_audio_wave[FFT_N];         // Live raw audio waveform for oscilloscope
 } spectrum_data_t;
 
 /**

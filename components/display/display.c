@@ -104,7 +104,7 @@ esp_err_t display_init(void)
     gpio_config(&pwr_cfg);
     gpio_set_level(PIN_NUM_LCD_PWR, 0); // Active LOW to power on LCD
 
-    // 2. LEDC PWM Backlight Setup (GPIO 19)
+    // 2. LEDC PWM Backlight Setup (GPIO 19) - Full 100% Brightness Initial
     ledc_timer_config_t ledc_timer = {
         .speed_mode       = LEDC_LOW_SPEED_MODE,
         .timer_num        = LEDC_TIMER_0,
@@ -120,10 +120,13 @@ esp_err_t display_init(void)
         .timer_sel      = LEDC_TIMER_0,
         .intr_type      = LEDC_INTR_DISABLE,
         .gpio_num       = PIN_NUM_LCD_BL,
-        .duty           = 255, // 100% initial duty
+        .duty           = 255, // Max initial 100% duty cycle
         .hpoint         = 0
     };
     ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
+
+    // Force LEDC update for 100% initial brightness
+    display_set_brightness(100);
 
     // 3. SPI Bus Setup
     spi_bus_config_t buscfg = {
@@ -149,7 +152,7 @@ esp_err_t display_init(void)
     };
     ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)SPI2_HOST, &io_config, &io_handle));
 
-    // 5. ST7789 Panel Driver Setup (ESP-IDF v6.1 element order API)
+    // 5. ST7789 Panel Driver Setup
     esp_lcd_panel_dev_config_t panel_config = {
         .reset_gpio_num = PIN_NUM_RST,
         .rgb_ele_order = LCD_RGB_ELEMENT_ORDER_RGB,
@@ -171,7 +174,7 @@ esp_err_t display_init(void)
     display_clear(COLOR_RETRO_DARKBG);
     display_flush();
 
-    ESP_LOGI(TAG, "Display initialization complete.");
+    ESP_LOGI(TAG, "Display initialization complete at 100%% brightness.");
     return ESP_OK;
 }
 

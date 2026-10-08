@@ -4,8 +4,14 @@ on:
   push:
     branches:
       - main
+      - esp32-hardware-showcase
     tags:
       - 'v*'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -40,7 +46,6 @@ jobs:
           cp docs/esp32_hardware_showcase.bin release/
 
       - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

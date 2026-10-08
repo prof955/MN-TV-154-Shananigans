@@ -19,7 +19,7 @@ typedef enum {
     UI_MODE_SPECTRUM = 0,
     UI_MODE_3D_GRAPHICS,
     UI_MODE_SYSTEM_DASHBOARD,
-    UI_MODE_TOUCH_OSCILLOSCOPE,
+    UI_MODE_AUDIO_OSCILLOSCOPE,
     UI_MODE_MAX
 } ui_mode_t;
 
@@ -29,7 +29,7 @@ static SemaphoreHandle_t data_mutex = NULL;
 static spectrum_data_t shared_spectrum = {0};
 static system_stats_t shared_stats = {0};
 
-// 3D Cube & Particle State Definitions
+// 3D Cube & Multi-Shape State Definitions
 typedef struct {
     float x, y, z;
 } point3d_t;
@@ -40,18 +40,30 @@ typedef struct {
     uint8_t life;
 } particle_t;
 
-#define NUM_PARTICLES 30
+#define NUM_PARTICLES 35
 static particle_t particles[NUM_PARTICLES];
 
+// Outer Enlarged 3D Cube Vertices (Size 55)
 static point3d_t cube_vertices[8] = {
-    {-25, -25, -25}, { 25, -25, -25}, { 25,  25, -25}, {-25,  25, -25},
-    {-25, -25,  25}, { 25, -25,  25}, { 25,  25,  25}, {-25,  25,  25}
+    {-55, -55, -55}, { 55, -55, -55}, { 55,  55, -55}, {-55,  55, -55},
+    {-55, -55,  55}, { 55, -55,  55}, { 55,  55,  55}, {-55,  55,  55}
 };
 
 static int cube_edges[12][2] = {
     {0, 1}, {1, 2}, {2, 3}, {3, 0},
     {4, 5}, {5, 6}, {6, 7}, {7, 4},
     {0, 4}, {1, 5}, {2, 6}, {3, 7}
+};
+
+// Inner Rotating Octahedron Vertices (Size 30)
+static point3d_t octa_vertices[6] = {
+    {0, -35, 0}, {0, 35, 0}, {-35, 0, 0}, {35, 0, 0}, {0, 0, -35}, {0, 0, 35}
+};
+
+static int octa_edges[12][2] = {
+    {0, 2}, {0, 3}, {0, 4}, {0, 5},
+    {1, 2}, {1, 3}, {1, 4}, {1, 5},
+    {2, 4}, {4, 3}, {3, 5}, {5, 2}
 };
 
 static float angle_x = 0.0f;
@@ -62,7 +74,7 @@ static void reset_particles(void) {
         particles[i].x = 120.0f;
         particles[i].y = 120.0f;
         float angle = ((float)rand() / RAND_MAX) * 2.0f * M_PI;
-        float speed = 1.0f + ((float)rand() / RAND_MAX) * 3.0f;
+        float speed = 1.0f + ((float)rand() / RAND_MAX) * 3.5f;
         particles[i].vx = cosf(angle) * speed;
         particles[i].vy = sinf(angle) * speed;
         particles[i].life = 20 + rand() % 40;
@@ -151,12 +163,12 @@ static void render_spectrum_mode(const spectrum_data_t *spec)
     display_draw_string(10, 222, buf, spec->clap_detected ? COLOR_RETRO_BRICKRED : COLOR_RETRO_AMBER, COLOR_RETRO_DARKBG, true);
 }
 
-// Mode 1: Synthwave 3D Wireframe Cube & Particles
+// Mode 1: Synthwave Enlarged 3D Cube + Inner Octahedron & Particles
 static void render_3d_graphics_mode(void)
 {
     display_clear(COLOR_RETRO_DARKBG);
 
-    display_draw_string(24, 8, "SYNTHWAVE 3D SIMULATION", COLOR_RETRO_SYNTHPINK, COLOR_RETRO_DARKBG, true);
+    display_draw_string(24, 8, "SYNTHWAVE 3D MULTI-SHAPE", COLOR_RETRO_SYNTHPINK, COLOR_RETRO_DARKBG, true);
     display_draw_line(24, 18, 216, 18, COLOR_RETRO_CYAN);
 
     // 1. Particle Simulation
@@ -169,7 +181,7 @@ static void render_3d_graphics_mode(void)
             particles[i].x = 120.0f;
             particles[i].y = 120.0f;
             float angle = ((float)rand() / RAND_MAX) * 2.0f * M_PI;
-            float speed = 1.0f + ((float)rand() / RAND_MAX) * 3.0f;
+            float speed = 1.0f + ((float)rand() / RAND_MAX) * 3.5f;
             particles[i].vx = cosf(angle) * speed;
             particles[i].vy = sinf(angle) * speed;
             particles[i].life = 20 + rand() % 40;
@@ -178,31 +190,53 @@ static void render_3d_graphics_mode(void)
         display_draw_pixel((int)particles[i].x, (int)particles[i].y, particles[i].color);
     }
 
-    // 2. 3D Cube Matrix Projections
-    angle_x += 0.04f;
-    angle_y += 0.05f;
+    // Rotation angles
+    angle_x += 0.03f;
+    angle_y += 0.04f;
 
-    point3d_t proj[8];
+    // 2. Render Outer Enlarged 3D Cube (Size 55)
+    point3d_t proj_cube[8];
     for (int i = 0; i < 8; i++) {
-        // Rotate around X
         float y1 = cube_vertices[i].y * cosf(angle_x) - cube_vertices[i].z * sinf(angle_x);
         float z1 = cube_vertices[i].y * sinf(angle_x) + cube_vertices[i].z * cosf(angle_x);
-        // Rotate around Y
         float x2 = cube_vertices[i].x * cosf(angle_y) + z1 * sinf(angle_y);
         float z2 = -cube_vertices[i].x * sinf(angle_y) + z1 * cosf(angle_y);
 
-        // Perspective projection
-        float distance = 120.0f;
-        float fov = 150.0f / (distance + z2);
+        float distance = 140.0f;
+        float fov = 160.0f / (distance + z2);
 
-        proj[i].x = 120.0f + x2 * fov;
-        proj[i].y = 120.0f + y1 * fov;
+        proj_cube[i].x = 120.0f + x2 * fov;
+        proj_cube[i].y = 120.0f + y1 * fov;
     }
 
     for (int i = 0; i < 12; i++) {
         int p1 = cube_edges[i][0];
         int p2 = cube_edges[i][1];
-        display_draw_line((int)proj[p1].x, (int)proj[p1].y, (int)proj[p2].x, (int)proj[p2].y, COLOR_RETRO_CYAN);
+        display_draw_line((int)proj_cube[p1].x, (int)proj_cube[p1].y, (int)proj_cube[p2].x, (int)proj_cube[p2].y, COLOR_RETRO_CYAN);
+    }
+
+    // 3. Render Inner Rotating 3D Octahedron (Opposite rotation)
+    float inv_angle_x = -angle_x * 1.5f;
+    float inv_angle_y = -angle_y * 1.5f;
+
+    point3d_t proj_octa[6];
+    for (int i = 0; i < 6; i++) {
+        float y1 = octa_vertices[i].y * cosf(inv_angle_x) - octa_vertices[i].z * sinf(inv_angle_x);
+        float z1 = octa_vertices[i].y * sinf(inv_angle_x) + octa_vertices[i].z * cosf(inv_angle_x);
+        float x2 = octa_vertices[i].x * cosf(inv_angle_y) + z1 * sinf(inv_angle_y);
+        float z2 = -octa_vertices[i].x * sinf(inv_angle_y) + z1 * cosf(inv_angle_y);
+
+        float distance = 140.0f;
+        float fov = 160.0f / (distance + z2);
+
+        proj_octa[i].x = 120.0f + x2 * fov;
+        proj_octa[i].y = 120.0f + y1 * fov;
+    }
+
+    for (int i = 0; i < 12; i++) {
+        int p1 = octa_edges[i][0];
+        int p2 = octa_edges[i][1];
+        display_draw_line((int)proj_octa[p1].x, (int)proj_octa[p1].y, (int)proj_octa[p2].x, (int)proj_octa[p2].y, COLOR_RETRO_SYNTHPINK);
     }
 }
 
@@ -247,60 +281,69 @@ static void render_system_dashboard_mode(const system_stats_t *stats)
     }
 }
 
-// Mode 3: T9 Amber CRT Touch Oscilloscope
-static void render_touch_oscilloscope_mode(void)
+// Mode 3: Live Audio PCM Waveform Oscilloscope & RMS Plotter
+static void render_audio_oscilloscope_mode(const spectrum_data_t *spec)
 {
-    static float scope_buffer[240] = {0};
-    uint16_t raw_touch = touch_read_raw();
+    static float rms_history[220] = {0};
 
-    // Shift wave buffer left
-    for (int i = 0; i < 239; i++) {
-        scope_buffer[i] = scope_buffer[i + 1];
+    // Shift RMS history left
+    for (int i = 0; i < 219; i++) {
+        rms_history[i] = rms_history[i + 1];
     }
-    scope_buffer[239] = (float)raw_touch;
+    rms_history[219] = spec->rms_volume;
 
     display_clear(COLOR_RETRO_DARKBG);
 
-    // Scope Header
-    display_draw_string(16, 8, "T9 AMBER TOUCH SCOPE", COLOR_RETRO_AMBER, COLOR_RETRO_DARKBG, true);
+    // Oscilloscope Header
+    display_draw_string(10, 8, "AUDIO WAVEFORM SCOPE", COLOR_RETRO_AMBER, COLOR_RETRO_DARKBG, true);
     display_draw_line(10, 18, 230, 18, COLOR_RETRO_AMBER);
 
-    // Oscilloscope Grid Lines
-    for (int x = 20; x < 240; x += 40) {
-        for (int y = 30; y < 210; y += 8) {
+    // Grid lines
+    for (int x = 10; x < 230; x += 30) {
+        for (int y = 25; y < 125; y += 6) {
             display_draw_pixel(x, y, COLOR_RETRO_PURPLE);
         }
     }
-    for (int y = 30; y <= 210; y += 30) {
-        for (int x = 10; x < 230; x += 8) {
-            display_draw_pixel(x, y, COLOR_RETRO_PURPLE);
-        }
-    }
+    display_draw_line(10, 75, 230, 75, COLOR_RETRO_PURPLE); // Zero line
 
-    // Plot Waveform
+    // Plot Live PCM Waveform (Top window)
     for (int x = 10; x < 229; x++) {
-        int y1 = 180 - (int)((scope_buffer[x] / 3000.0f) * 120.0f);
-        int y2 = 180 - (int)((scope_buffer[x + 1] / 3000.0f) * 120.0f);
+        int sample_idx = (x - 10) * 2;
+        int y1 = 75 - (int)(spec->raw_audio_wave[sample_idx] * 40.0f);
+        int y2 = 75 - (int)(spec->raw_audio_wave[sample_idx + 1] * 40.0f);
 
-        if (y1 < 25) {
-            y1 = 25;
-        }
-        if (y1 > 210) {
-            y1 = 210;
-        }
-        if (y2 < 25) {
-            y2 = 25;
-        }
-        if (y2 > 210) {
-            y2 = 210;
-        }
+        if (y1 < 25) y1 = 25;
+        if (y1 > 125) y1 = 125;
+        if (y2 < 25) y2 = 25;
+        if (y2 > 125) y2 = 125;
 
-        display_draw_line(x, y1, x + 1, y2, COLOR_RETRO_AMBER);
+        display_draw_line(x, y1, x + 1, y2, COLOR_RETRO_MINT);
+    }
+
+    // Partition Divider
+    display_draw_line(10, 132, 230, 132, COLOR_RETRO_GOLD);
+    display_draw_string(10, 136, "SCROLLING RMS VU PLOTTER", COLOR_RETRO_GOLD, COLOR_RETRO_DARKBG, true);
+
+    // Plot Scrolling RMS History (Bottom window)
+    for (int x = 10; x < 229; x++) {
+        int idx = x - 10;
+        int h1 = (int)((rms_history[idx] / 100.0f) * 65.0f);
+        int h2 = (int)((rms_history[idx + 1] / 100.0f) * 65.0f);
+
+        int y1 = 215 - h1;
+        int y2 = 215 - h2;
+
+        if (y1 < 148) y1 = 148;
+        if (y1 > 215) y1 = 215;
+        if (y2 < 148) y2 = 148;
+        if (y2 > 215) y2 = 215;
+
+        display_draw_line(x, y1, x + 1, y2, COLOR_RETRO_BRICKRED);
     }
 
     char buf[32];
-    snprintf(buf, sizeof(buf), "RAW T9: %4d  BL: %d%%", raw_touch, display_get_brightness());
-    display_draw_string(10, 222, buf, COLOR_RETRO_GOLD, COLOR_RETRO_DARKBG, true);
+    snprintf(buf, sizeof(buf), "AUDIO RMS: %3d%%  GAIN: 6.0x", (int)spec->rms_volume);
+    display_draw_string(10, 222, buf, COLOR_RETRO_AMBER, COLOR_RETRO_DARKBG, true);
 }
 
 // -----------------------------------------------------------------------------
@@ -356,8 +399,8 @@ static void ui_render_task(void *pvParameters)
             case UI_MODE_SYSTEM_DASHBOARD:
                 render_system_dashboard_mode(&stats_copy);
                 break;
-            case UI_MODE_TOUCH_OSCILLOSCOPE:
-                render_touch_oscilloscope_mode();
+            case UI_MODE_AUDIO_OSCILLOSCOPE:
+                render_audio_oscilloscope_mode(&spec_copy);
                 break;
             default:
                 break;
