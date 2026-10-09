@@ -83,18 +83,35 @@
             font-weight: bold;
         }
 
+        .web-serial-warning {
+            display: block;
+            color: #f87171;
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
         .footer {
             margin-top: 25px;
             font-size: 0.8rem;
-            color: #718096;
+            color: #94a3b8;
         }
 
         a {
             color: var(--accent-cyan);
             text-decoration: none;
+            border-radius: 2px;
         }
         a:hover {
             text-decoration: underline;
+        }
+        a:focus-visible, button:focus-visible {
+            outline: 2px solid var(--accent-gold);
+            outline-offset: 3px;
         }
     </style>
 </head>
@@ -115,11 +132,18 @@
 
     <div class="flasher-box">
         <p>Connect your ESP32 via USB and click the button below to flash live in your browser:</p>
-        <esp-web-install-button manifest="./manifest.json"></esp-web-install-button>
+        <esp-web-install-button manifest="./manifest.json">
+            <span slot="unsupported" class="web-serial-warning">
+                ⚠️ Web Serial is not supported in this browser. Please use Chrome, Edge, or Opera on desktop.
+            </span>
+            <span slot="not-allowed" class="web-serial-warning">
+                ⚠️ Web Serial requires an HTTPS connection or localhost.
+            </span>
+        </esp-web-install-button>
     </div>
 
     <div class="footer">
-        Powered by <a href="https://esphome.github.io/esp-web-tools/" target="_blank">ESP Web Tools</a> & ESP-IDF
+        Powered by <a href="https://esphome.github.io/esp-web-tools/" target="_blank" rel="noopener noreferrer">ESP Web Tools</a> & ESP-IDF
     </div>
 </div>
 
