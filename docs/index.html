@@ -83,6 +83,39 @@
             font-weight: bold;
         }
 
+        .flash-btn {
+            background-color: var(--accent-pink);
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 24px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .flash-btn:hover {
+            background-color: #ff3399;
+            transform: translateY(-1px);
+        }
+
+        .flash-btn:focus-visible {
+            outline: 2px solid var(--accent-cyan);
+            outline-offset: 4px;
+        }
+
+        .web-serial-warning {
+            background: rgba(253, 32, 0, 0.15);
+            border: 1px solid var(--accent-amber);
+            color: #f87171;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
         .footer {
             margin-top: 25px;
             font-size: 0.8rem;
@@ -115,7 +148,11 @@
 
     <div class="flasher-box">
         <p>Connect your ESP32 via USB and click the button below to flash live in your browser:</p>
-        <esp-web-install-button manifest="./manifest.json"></esp-web-install-button>
+        <esp-web-install-button manifest="./manifest.json">
+            <button slot="activate" class="flash-btn" aria-label="Connect and Flash ESP32 Firmware via WebSerial">⚡ CONNECT &amp; FLASH FIRMWARE</button>
+            <div slot="unsupported" class="web-serial-warning" role="alert">⚠️ Web Serial is not supported in this browser. Please use <strong>Google Chrome</strong>, <strong>Microsoft Edge</strong>, or <strong>Brave</strong> on desktop.</div>
+            <div slot="not-allowed" class="web-serial-warning" role="alert">⚠️ Web Serial requires an <strong>HTTPS</strong> connection or <strong>localhost</strong>.</div>
+        </esp-web-install-button>
     </div>
 
     <div class="footer">
