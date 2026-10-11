@@ -83,6 +83,38 @@
             font-weight: bold;
         }
 
+        .btn-install {
+            background-color: var(--accent-pink);
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 24px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-install:hover {
+            background-color: #e00070;
+        }
+
+        .btn-install:focus-visible {
+            outline: 3px solid var(--accent-cyan);
+            outline-offset: 3px;
+        }
+
+        .fallback-msg {
+            color: var(--accent-amber);
+            background: rgba(253, 32, 0, 0.1);
+            border: 1px solid var(--accent-amber);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+
         .footer {
             margin-top: 25px;
             font-size: 0.8rem;
@@ -93,8 +125,10 @@
             color: var(--accent-cyan);
             text-decoration: none;
         }
-        a:hover {
+        a:hover, a:focus-visible {
             text-decoration: underline;
+            outline: 2px solid var(--accent-cyan);
+            outline-offset: 2px;
         }
     </style>
 </head>
@@ -115,11 +149,19 @@
 
     <div class="flasher-box">
         <p>Connect your ESP32 via USB and click the button below to flash live in your browser:</p>
-        <esp-web-install-button manifest="./manifest.json"></esp-web-install-button>
+        <esp-web-install-button manifest="./manifest.json">
+            <button slot="activate" class="btn-install" aria-label="Connect and Install Firmware to ESP32">⚡ Connect & Install Firmware</button>
+            <div slot="unsupported" class="fallback-msg">
+                ⚠️ WebSerial is not supported in this browser. Please use Google Chrome, Microsoft Edge, or Opera on desktop to flash firmware.
+            </div>
+            <div slot="not-allowed" class="fallback-msg">
+                ⚠️ WebSerial requires an HTTPS connection or localhost.
+            </div>
+        </esp-web-install-button>
     </div>
 
     <div class="footer">
-        Powered by <a href="https://esphome.github.io/esp-web-tools/" target="_blank">ESP Web Tools</a> & ESP-IDF
+        Powered by <a href="https://esphome.github.io/esp-web-tools/" target="_blank" rel="noopener noreferrer">ESP Web Tools</a> & ESP-IDF
     </div>
 </div>
 
