@@ -92,9 +92,24 @@
         a {
             color: var(--accent-cyan);
             text-decoration: none;
+            border-radius: 2px;
         }
         a:hover {
             text-decoration: underline;
+        }
+        a:focus-visible {
+            outline: 2px solid var(--accent-gold);
+            outline-offset: 3px;
+        }
+
+        .fallback-msg {
+            color: var(--accent-gold);
+            background: rgba(255, 183, 0, 0.1);
+            border: 1px solid var(--accent-gold);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -115,7 +130,14 @@
 
     <div class="flasher-box">
         <p>Connect your ESP32 via USB and click the button below to flash live in your browser:</p>
-        <esp-web-install-button manifest="./manifest.json"></esp-web-install-button>
+        <esp-web-install-button manifest="./manifest.json">
+            <div slot="unsupported" class="fallback-msg">
+                ⚠️ Your browser does not support Web Serial. Please use Google Chrome or Microsoft Edge on Desktop.
+            </div>
+            <div slot="not-allowed" class="fallback-msg">
+                ⚠️ Web Serial is only allowed in secure HTTPS contexts or localhost.
+            </div>
+        </esp-web-install-button>
     </div>
 
     <div class="footer">
