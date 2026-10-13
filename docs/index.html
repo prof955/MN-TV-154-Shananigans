@@ -83,6 +83,39 @@
             font-weight: bold;
         }
 
+        .btn-install {
+            background-color: var(--accent-pink);
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-install:hover {
+            opacity: 0.9;
+        }
+
+        .btn-install:focus-visible,
+        a:focus-visible {
+            outline: 2px solid var(--accent-cyan);
+            outline-offset: 3px;
+        }
+
+        .notice-warning {
+            color: var(--accent-amber);
+            background: rgba(253, 32, 0, 0.1);
+            border: 1px solid var(--accent-amber);
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
         .footer {
             margin-top: 25px;
             font-size: 0.8rem;
@@ -115,11 +148,15 @@
 
     <div class="flasher-box">
         <p>Connect your ESP32 via USB and click the button below to flash live in your browser:</p>
-        <esp-web-install-button manifest="./manifest.json"></esp-web-install-button>
+        <esp-web-install-button manifest="./manifest.json">
+            <button slot="activate" class="btn-install" aria-label="Connect and Install ESP32 Firmware">Connect & Install</button>
+            <div slot="unsupported" class="notice-warning">⚠️ WebSerial is not supported in this browser. Please use Google Chrome, Microsoft Edge, or Brave on desktop.</div>
+            <div slot="not-allowed" class="notice-warning">⚠️ WebSerial requires an HTTPS connection or localhost.</div>
+        </esp-web-install-button>
     </div>
 
     <div class="footer">
-        Powered by <a href="https://esphome.github.io/esp-web-tools/" target="_blank">ESP Web Tools</a> & ESP-IDF
+        Powered by <a href="https://esphome.github.io/esp-web-tools/" target="_blank" rel="noopener noreferrer">ESP Web Tools</a> & ESP-IDF
     </div>
 </div>
 
